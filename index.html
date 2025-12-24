@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- 网站图标 -->
+  <link rel="icon" href="/image/favicon.ico" type="image/x-icon">
+  <title>倒霉熊和他亲爱的婷</title>
+  <!-- React 18 -->
+  <script src="lib/react.production.min.js"></script>
+  <script src="lib/react-dom.production.min.js"></script>
+  <script src="lib/babel.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Avenir", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      height: 100vh;
+      background: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: background 1s ease-in-out;
+    }
+
+    body.typing-complete {
+      background: linear-gradient(135deg, #fce7f3 0%, #ddd6fe 50%, #dbeafe 100%);
+    }
+
+    body::before,
+    body::after {
+      content: '';
+      position: absolute;
+      border-radius: 50%;
+      opacity: 0.1;
+    }
+
+    body::before {
+      content: '';
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      top: -100px;
+      right: -100px;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    body::after {
+      width: 200px;
+      height: 200px;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      bottom: -50px;
+      left: -50px;
+      animation: float 8s ease-in-out infinite reverse;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 600px;
+      padding: 2rem;
+    }
+
+    .main-title {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #1f2937;
+      margin-bottom: 2rem;
+      line-height: 1.2;
+    }
+
+    .content {
+      margin-bottom: 2rem;
+    }
+
+    .subtitle {
+      font-size: 1.125rem;
+      color: #4b5563;
+      margin-bottom: 1.5rem;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(135deg, #ec4899 0%, #8b5cf6 50%, #3b82f6 100%);
+      border: none;
+      border-radius: 0.5rem;
+      box-shadow: 0 10px 15px -3px rgba(236, 72, 153, 0.3),
+        0 4px 6px -2px rgba(139, 92, 246, 0.2),
+        0 0 30px rgba(236, 72, 153, 0.4);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease-in-out;
+      transform: translateY(0);
+      position: relative;
+      overflow: hidden;
+      animation: buttonPulse 2s ease-in-out infinite, buttonFloat 3s ease-in-out infinite;
+    }
+
+    /* 添加闪光效果 */
+    .button::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg,
+          transparent,
+          rgba(255, 255, 255, 0.1),
+          transparent);
+      transform: rotate(45deg);
+      animation: buttonShine 3s ease-in-out infinite;
+    }
+
+    .button:hover {
+      background: linear-gradient(135deg, #db2777 0%, #7c3aed 50%, #2563eb 100%);
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 20px 25px -5px rgba(219, 39, 119, 0.4),
+        0 10px 10px -5px rgba(124, 58, 237, 0.3),
+        0 0 40px rgba(236, 72, 153, 0.6);
+      animation: none;
+      /* 悬停时停止自动动画 */
+    }
+
+    .button:active {
+      transform: translateY(0) scale(1.02);
+    }
+
+    .footer-text {
+      margin-top: 3rem;
+      font-size: 0.875rem;
+      color: #67738c;
+    }
+
+    .footer-text p {
+      margin-bottom: 2px;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .main-title {
+        font-size: 2rem;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-title {
+        font-size: 1.75rem;
+      }
+
+      .button {
+        padding: 0.625rem 1.5rem;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* 添加一些动画效果 */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+
+
+    /* 按钮上下浮动动画 */
+    @keyframes buttonFloat {
+
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-5px);
+      }
+    }
+
+    /* 按钮闪光动画 */
+    @keyframes buttonShine {
+      0% {
+        left: -50%;
+      }
+
+      50%,
+      100% {
+        left: 150%;
+      }
+    }
+
+    .container {
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .main-title {
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .content {
+      animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    .footer-text {
+      animation: fadeInUp 0.8s ease-out 0.6s both;
+    }
+
+    /* 星星效果 */
+    .stars {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .star {
+      position: absolute;
+      width: 3px;
+      height: 3px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: 0 0 6px rgba(255, 255, 255, 0.8);
+      animation: twinkle 3s ease-in-out infinite;
+    }
+
+    @keyframes twinkle {
+
+      0%,
+      100% {
+        opacity: 0.3;
+        transform: scale(1);
+      }
+
+      50% {
+        opacity: 1;
+        transform: scale(1.2);
+      }
+    }
+
+    /* 花瓣效果 */
+    .petals {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+      overflow: hidden;
+    }
+
+    .petal {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: linear-gradient(135deg, #ffc0cb 0%, #ffb6c1 100%);
+      border-radius: 50% 0 50% 0;
+      opacity: 0.6;
+      animation: fall linear infinite;
+    }
+
+    @keyframes fall {
+      0% {
+        transform: translateY(-10vh) rotate(0deg);
+        opacity: 0.7;
+      }
+
+      100% {
+        transform: translateY(110vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    /* 爱心效果 */
+    .hearts {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .heart {
+      position: absolute;
+      bottom: -30px;
+      font-size: 20px;
+      color: #ff69b4;
+      opacity: 0.6;
+      animation: rise linear infinite;
+    }
+
+    @keyframes rise {
+      0% {
+        transform: translateY(0) scale(0.8);
+        opacity: 0.7;
+      }
+
+      100% {
+        transform: translateY(-100vh) scale(1.2);
+        opacity: 0;
+      }
+    }
+
+    .container {
+      position: relative;
+      z-index: 10;
+    }
+
+    /* 情话样式 */
+    .love-quote {
+      font-size: 0.95rem;
+      color: #be185d;
+      font-style: italic;
+      margin-bottom: .42rem;
+      opacity: 0.9;
+      font-weight: 500;
+    }
+
+    /* 加载动画样式 */
+    .loading-container {
+      text-align: center;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .progress-text {
+      font-size: 2.5rem;
+      font-weight: 300;
+      color: #555;
+      margin-bottom: 1.5rem;
+      font-family: monospace;
+    }
+
+    .progress-bar {
+      width: 240px;
+      height: 2px;
+      background: #f0f0f0;
+      border-radius: 2px;
+      margin: 0 auto 1.5rem;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #333;
+      transition: width 0.05s linear;
+    }
+
+    .loading-hint {
+      font-size: 0.85rem;
+      color: #999;
+      font-weight: 300;
+      letter-spacing: 0.1em;
+      opacity: 0;
+      animation: fadeIn 1s ease-out forwards 0.5s;
+    }
+
+    /* 打字机效果样式 */
+    .typing-container {
+      text-align: center;
+      max-width: 600px;
+      padding: 2rem;
+      opacity: 0;
+      animation: fadeIn 1s ease-out forwards;
+    }
+
+    .typing-text {
+      font-size: 1.5rem;
+      color: #333;
+      line-height: 2;
+      min-height: 200px;
+      font-weight: 300;
+      letter-spacing: 0.05em;
+    }
+
+    .typing-text .line {
+      margin-bottom: 0.5rem;
+    }
+
+    .cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1em;
+      background-color: #333;
+      animation: blink 1s infinite;
+      vertical-align: baseline;
+      margin-left: 2px;
+      position: relative;
+      top: 0.1em;
+    }
+
+    .continue-btn {
+
+      padding: 0.875rem 2.5rem;
+      font-size: 0.95rem;
+      font-weight: 500;
+      color: #555;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 25px;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.25s ease;
+      letter-spacing: 0.05em;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .continue-btn.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .continue-btn:hover {
+      color: #222;
+      border-color: #bbb;
+      background: #fafafa;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .continue-btn:active {
+      transform: translateY(-1px);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    .arrow-icon {
+      display: inline-block;
+      margin-left: 4px;
+      font-size: 1.2em;
+      transition: transform 0.3s ease;
+      animation: arrowPulse 2s ease-in-out infinite;
+    }
+
+    .continue-btn:hover .arrow-icon {
+      transform: translateX(3px);
+      animation-play-state: paused;
+    }
+
+    @keyframes arrowPulse {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      50% {
+        transform: translateX(5px);
+      }
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInLine {
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes blink {
+
+      0%,
+      50% {
+        opacity: 1;
+      }
+
+      51%,
+      100% {
+        opacity: 0;
+      }
+    }
+
+    /* 隐藏原始内容 */
+    .original-content {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+
+    .original-content.show {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .glass-card {
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 24px;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+      padding: 1.2rem 1rem;
+      text-align: center;
+      width: 90%;
+      position: relative;
+      z-index: 10;
+      transition: transform 0.3s ease;
+    }
+
+    .glass-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .avatar-box {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, #fbc2eb 0%, #a6c1ee 100%);
+      border-radius: 50%;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+      animation: floatAvatar 3s ease-in-out infinite;
+    }
+
+    @keyframes floatAvatar {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-8px);
+      }
+    }
+
+    .love-timer {
+      margin: 1.5rem 0;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.4);
+      border-radius: 12px;
+    }
+
+    .timer-label {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 0.5rem;
+    }
+
+    .timer-digits {
+      font-family: 'Courier New', monospace;
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #444;
+      display: flex;
+      justify-content: center;
+    }
+
+    .timer-digits span {
+      color: #ec4899;
+      margin: 0 4px;
+    }
+
+    .action-button {
+      display: inline-block;
+      padding: .75rem 2.5rem;
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+      background-size: 200% auto;
+      border: none;
+      border-radius: 50px;
+      box-shadow: 0 4px 15px rgba(255, 154, 158, 0.4);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .action-button:hover {
+      background-position: right center;
+      transform: scale(1.05);
+      box-shadow: 0 6px 20px rgba(255, 154, 158, 0.6);
+    }
+
+    .action-button:hover .arrow-icon {
+      transform: translateX(3px);
+      animation-play-state: paused;
+    }
+
+    /* 覆盖旧样式 */
+    .main-title {
+      margin-bottom: 1rem;
+      color: #2d3748;
+    }
+
+    .footer-text {
+      margin-top: 2rem;
+      font-size: 0.8rem;
+      color: #718096;
+      line-height: 1.6;
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root" style="width:100%;"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef, useMemo } = React;
+
+    const App = () => {
+      const [currentStage, setCurrentStage] = useState('loading');
+      const [progress, setProgress] = useState(0);
+      const [typingComplete, setTypingComplete] = useState(false);
+      const [showCursor, setShowCursor] = useState(true);
+
+      // Timer state
+      const [timeData, setTimeData] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+      const startTime = useMemo(() => new Date('2025-12-21').getTime(), []);
+
+      // Typing state
+      const [displayedLines, setDisplayedLines] = useState([]);
+      const lines = [
+        '今年我遇到了一个女孩',
+        '她的出现让我放下一切',
+        '让我的生活中有了期盼',
+        '我真的很喜欢她',
+        '我会一直陪着她',
+        '很荣幸我已拥有了全世界',
+        '最漂亮最独一无二的GirlFriend',
+        '亲爱的婷',
+        '欢迎来到我的全世界'
+      ];
+      const typingSpeed = 180;
+
+      const currentLineIndexRef = useRef(0);
+      const currentCharIndexRef = useRef(0);
+      const timerIntervalRef = useRef(null);
+
+      // Lifecycle: Mounted
+      useEffect(() => {
+        startLoading();
+        recordVisit();
+        startTimer();
+
+        return () => {
+          if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+        };
+      }, []);
+
+      const startTimer = () => {
+        timerIntervalRef.current = setInterval(() => {
+          const now = new Date().getTime();
+          const distance = now - startTime;
+
+          setTimeData({
+            days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+            hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+            minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+            seconds: Math.floor((distance % (1000 * 60)) / 1000)
+          });
+        }, 1000);
+      };
+
+      const startLoading = () => {
+        const duration = 4500;
+        const interval = 30;
+        const step = 100 / (duration / interval);
+
+        const timer = setInterval(() => {
+          setProgress(prev => {
+            const next = prev + step;
+            if (next >= 100) {
+              clearInterval(timer);
+              setTimeout(() => {
+                setCurrentStage('typing');
+                // Trigger typing logic after state update
+                setTimeout(typeNextChar, 100);
+              }, 1200);
+              return 100;
+            }
+            return next;
+          });
+        }, interval);
+      };
+
+      const typeNextChar = () => {
+        const lineIdx = currentLineIndexRef.current;
+        const charIdx = currentCharIndexRef.current;
+
+        if (lineIdx >= lines.length) {
+          finishTyping();
+          return;
+        }
+
+        const currentLine = lines[lineIdx];
+
+        if (charIdx === 0) {
+          setDisplayedLines(prev => [...prev, '']);
+        }
+
+        if (charIdx < currentLine.length) {
+          setDisplayedLines(prev => {
+            const newLines = [...prev];
+            // Ensure the line exists
+            if (newLines[lineIdx] !== undefined) {
+              newLines[lineIdx] = currentLine.substring(0, charIdx + 1);
+            } else {
+              newLines[lineIdx] = currentLine.substring(0, charIdx + 1);
+            }
+            return newLines;
+          });
+          currentCharIndexRef.current++;
+          setTimeout(typeNextChar, typingSpeed);
+        } else {
+          currentLineIndexRef.current++;
+          currentCharIndexRef.current = 0;
+          setTimeout(typeNextChar, 500);
+        }
+      };
+
+      const finishTyping = () => {
+        setTypingComplete(true);
+        setTimeout(() => {
+          setShowCursor(false);
+        }, 2000);
+      };
+
+      const continueToMain = () => {
+        setCurrentStage('main');
+        document.body.classList.add('typing-complete');
+        // Wait for DOM update
+        setTimeout(createBackgroundEffects, 100);
+      };
+
+      const recordVisit = () => {
+        const visitData = {
+          url: window.location.href,
+          title: document.title,
+          referrer: document.referrer,
+          screen: `${screen.width}x${screen.height}`,
+          language: navigator.language,
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone
+        };
+
+        fetch(`/api/record-visit?${new URLSearchParams(visitData)}`)
+          .then(response => response.json())
+          .then(data => {
+            console.log("访问记录:", data)
+            console.log(`✅ 访问已记录 (ID: ${data.visitId})`);
+          })
+          .catch(error => {
+            console.log('⚠️ 访问记录失败（不影响用户体验）');
+          });
+
+        const visitStartTime = Date.now();
+        window.addEventListener('beforeunload', () => {
+          const stayTime = Date.now() - visitStartTime;
+          navigator.sendBeacon(`/api/record-visit?action=leave&stayTime=${stayTime}&url=${encodeURIComponent(window.location.href)}`);
+        });
+      };
+
+      const createBackgroundEffects = () => {
+        // 生成星星
+        const starsContainer = document.getElementById('stars');
+        if (starsContainer) {
+          const starCount = 15;
+          for (let i = 0; i < starCount; i++) {
+            const star = document.createElement('div');
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = Math.random() * 100 + '%';
+            star.style.animationDelay = Math.random() * 3 + 's';
+            star.style.animationDuration = (2 + Math.random() * 2) + 's';
+            starsContainer.appendChild(star);
+          }
+        }
+
+        // 生成花瓣
+        const petalsContainer = document.getElementById('petals');
+        if (petalsContainer) {
+          const petalCount = 8;
+          for (let i = 0; i < petalCount; i++) {
+            const petal = document.createElement('div');
+            petal.className = 'petal';
+            petal.style.left = Math.random() * 100 + '%';
+            petal.style.animationDuration = (10 + Math.random() * 10) + 's';
+            petal.style.animationDelay = Math.random() * 5 + 's';
+            petalsContainer.appendChild(petal);
+          }
+        }
+
+        // 生成爱心
+        const heartsContainer = document.getElementById('hearts');
+        if (heartsContainer) {
+          const heartCount = 6;
+          for (let i = 0; i < heartCount; i++) {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.innerHTML = '💗';
+            heart.style.left = (10 + Math.random() * 80) + '%';
+            heart.style.animationDuration = (8 + Math.random() * 8) + 's';
+            heart.style.animationDelay = Math.random() * 5 + 's';
+            heartsContainer.appendChild(heart);
+          }
+        }
+      };
+
+      return (
+        <div style={{ width: '100%' }}>
+          {currentStage === 'loading' && (
+            <div className="loading-container">
+              <div className="progress-text">{Math.floor(progress)}%</div>
+              <div className="progress-bar">
+                <div className="progress-fill" style={{ width: progress + '%' }}></div>
+              </div>
+              <div className="loading-hint">亲爱的婷，正在为你准备惊喜...</div>
+            </div>
+          )}
+
+          {currentStage === 'typing' && (
+            <div className="typing-container" style={{ opacity: 1 }}>
+              <div className="typing-text">
+                {displayedLines.map((line, index) => (
+                  <div key={index} className="line">
+                    {line}
+                    {showCursor && index === displayedLines.length - 1 && <span className="cursor"></span>}
+                  </div>
+                ))}
+              </div>
+              {typingComplete && (
+                <button
+                  className={`continue-btn ${typingComplete ? 'show' : ''}`}
+                  onClick={continueToMain}
+                >
+                  继续前往下一份幸福 💕
+                  <span className="arrow-icon">→</span>
+                </button>
+              )}
+            </div>
+          )}
+
+          {currentStage === 'main' && (
+            <div className={`original-content ${currentStage === 'main' ? 'show' : ''}`}>
+              <div className="stars" id="stars"></div>
+              <div className="petals" id="petals"></div>
+              <div className="hearts" id="hearts"></div>
+
+              <div className="glass-card">
+                <h1 className="main-title">雅婷宝宝</h1>
+                <h2 className="main-title">我爱你</h2>
+
+                <div className="love-timer">
+                  <div className="timer-label">今天是我们在一起的</div>
+                  <div className="timer-digits">
+                    <span>{timeData.days}天</span>
+                    <span>{timeData.hours}时</span>
+                    <span>{timeData.minutes}分</span>
+                    <span>{timeData.seconds}秒</span>
+                  </div>
+                </div>
+
+                <div className="content">
+                  <p className="love-quote">"遇见你，是所有故事的开始"</p>
+                  <p className="love-quote">对你的爱，从来不只是嘴上说说</p>
+                  <p className="love-quote">而是如清水一般清澈、透明</p>
+                  <p className="subtitle" style={{ margin: '1rem 0' }}>(●'◡'●)</p>
+
+                  <a href="mcdull.html" className="action-button">
+                    开启专属旅程 <span class="arrow-icon">→</span>
+                  </a>
+                </div>
+
+                <div className="footer-text">
+                  <p>耐心是生活的关键</p>
+                  <p>永远陪在我身边</p>
+                  <p>把我们的碎碎念念变成岁岁年年</p>
+                  <p>我爱你</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);
+  </script>
+
+
+</body>
+
+</html>

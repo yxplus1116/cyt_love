@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>倒霉熊</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: "Avenir", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      height: 100vh;
+      background: linear-gradient(135deg, #374151 0%, #1f2937 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .container {
+      text-align: center;
+      max-width: 600px;
+      padding: 2rem;
+    }
+
+    .main-title {
+      font-size: 6rem;
+      font-weight: bold;
+      color: #e5e7eb;
+      margin-bottom: 1rem;
+      line-height: 1.2;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      letter-spacing: 0.1em;
+      opacity: 0.9;
+    }
+
+    .content {
+      margin-bottom: 2rem;
+    }
+
+    .subtitle {
+      font-size: 1.125rem;
+      color: #9ca3af;
+      margin-bottom: 1.5rem;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      font-weight: 600;
+      color: white;
+      background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+      border: none;
+      border-radius: 0.5rem;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s ease-in-out;
+      transform: translateY(0);
+    }
+
+    .button:hover {
+      background: linear-gradient(135deg, #374151 0%, #111827 100%);
+      transform: translateY(-2px) scale(1.05);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    .button:active {
+      transform: translateY(0) scale(1.02);
+    }
+
+    .footer-text {
+      margin-top: 3rem;
+      font-size: 0.875rem;
+      color: #9ca3af;
+    }
+
+    /* 响应式设计 */
+    @media (max-width: 768px) {
+      .main-title {
+        font-size: 4rem;
+      }
+
+      .container {
+        padding: 1rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-title {
+        font-size: 3rem;
+      }
+
+      .button {
+        padding: 0.625rem 1.5rem;
+        font-size: 0.9rem;
+      }
+    }
+
+    /* 添加一些动画效果 */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .container {
+      animation: fadeInUp 0.8s ease-out;
+    }
+
+    .main-title {
+      animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .content {
+      animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    .footer-text {
+      animation: fadeInUp 0.8s ease-out 0.6s both;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1 class="main-title">404</h1>
+    <h1 class="main-title">NOT FOUND</h1>
+    <div class="content">
+      <p class="subtitle">一旦失去，就再也找不到了...</p>
+
+      <a href="/" class="button">
+        回到首页
+      </a>
+    </div>
+
+    <div class="footer-text">
+      <p>平静也是一种幸福</p>
+    </div>
+  </div>
+</body>
+
+</html>

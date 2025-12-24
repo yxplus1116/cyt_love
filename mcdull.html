@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <title>For You :)</title>
+
+  <link rel="stylesheet" href="css/normalize.css">
+  <meta name="viewport" content="">
+  <link rel="stylesheet" href="css/style.css" media="screen" type="text/css" />
+
+</head>
+
+<body>
+  <div style="text-align:center;clear:both;position:absolute;top:0;left:260px">
+  </div>
+  <canvas class="canvas"></canvas>
+
+  <!-- 返回按钮 -->
+  <a href="index.html" class="back-button" style="opacity: 0;"></a>
+
+  <div class="help" style="opacity: 0;"></div>
+
+  <div class="ui" style="opacity: 0;">
+    <input class="ui-input" type="text" />
+    <span class="ui-return">↵</span>
+  </div>
+
+  <div class="overlay">
+    <div class="tabs">
+      <div class="tabs-labels"><span class="tabs-label">Commands</span></div>
+
+      <div class="tabs-panels">
+        <ul class="tabs-panel commands">
+          <li class="commands-item"><span class="commands-item-title">Text</span><span class="commands-item-info"
+              data-demo="Hello :)">Type anything</span><span class="commands-item-action">Demo</span></li>
+          <li class="commands-item"><span class="commands-item-title">Countdown</span><span class="commands-item-info"
+              data-demo="#countdown 10">#countdown<span class="commands-item-mode">number</span></span><span
+              class="commands-item-action">Demo</span></li>
+          <li class="commands-item"><span class="commands-item-title">Time</span><span class="commands-item-info"
+              data-demo="#time">#time</span><span class="commands-item-action">Demo</span></li>
+          <li class="commands-item"><span class="commands-item-title">Rectangle</span><span class="commands-item-info"
+              data-demo="#rectangle 30x15">#rectangle<span class="commands-item-mode">width x height</span></span><span
+              class="commands-item-action">Demo</span></li>
+          <li class="commands-item"><span class="commands-item-title">Circle</span><span class="commands-item-info"
+              data-demo="#circle 25">#circle<span class="commands-item-mode">diameter</span></span><span
+              class="commands-item-action">Demo</span></li>
+
+          <li class="commands-item commands-item--gap"><span class="commands-item-title">Animate</span><span
+              class="commands-item-info" data-demo="The time is|#time|#countdown 3|#icon thumbs-up"><span
+                class="commands-item-mode">command1</span>&nbsp;|<span
+                class="commands-item-mode">command2</span></span><span class="commands-item-action">Demo</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- Final Message Container -->
+  <div id="final-message" class="final-message">
+    <div class="message-content">
+      <p>🎁</p>
+      <h2>亲爱的婷</h2>
+      <h2>第一份礼物已悄然抵达 </h2>
+      <p>愿这份微光能温暖你的眼角眉梢</p>
+      <div class="divider"></div>
+      <p class="highlight">别急，箱底还藏着我最重要的心声 </p>
+      <p>请轻轻打开它...</p>
+      <p>要答应我</p>
+      <p>不许哭鼻子哟^ˍ^</p>
+      <div class="arrow-down">👇</div>
+    </div>
+  </div>
+
+  <style>
+    .final-message {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.95);
+      z-index: 9999;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      animation: fadeIn 2s ease-out;
+    }
+
+    .final-message.show {
+      display: flex;
+    }
+
+    .message-content {
+      /* max-width: 600px; */
+      padding: 40px;
+      /* background: rgba(255, 255, 255, 0.8); */
+      border-radius: 20px;
+
+      font-family: "Avenir", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      color: #4a5568;
+    }
+
+    .message-content h2 {
+      color: #d53f8c;
+      margin-bottom: 30px;
+      font-size: 42px;
+      font-weight: 600;
+    }
+
+    .message-content p {
+      font-size: 42px;
+      line-height: 1.8;
+      margin-bottom: 20px;
+      color: #4b5563;
+    }
+
+    .message-content .highlight {
+      font-weight: bold;
+      color: #805ad5;
+      font-size: 42px;
+      margin: 40px 0;
+    }
+
+    .message-content .divider {
+      height: 2px;
+      background: linear-gradient(to right, transparent, #cbd5e0, transparent);
+      margin: 45px 0;
+    }
+
+    .arrow-down {
+      font-size: 2.5rem;
+      margin-top: 25px;
+      animation: bounce 2s infinite;
+      cursor: default;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      20%,
+      50%,
+      80%,
+      100% {
+        transform: translateY(0);
+      }
+
+      40% {
+        transform: translateY(-10px);
+      }
+
+      60% {
+        transform: translateY(-5px);
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+  </style>
+
+  <script src="js/index.js"></script>
+
+</body>
+
+</html>
