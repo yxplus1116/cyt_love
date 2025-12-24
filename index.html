@@ -342,6 +342,7 @@
 
     /* 加载动画样式 */
     .loading-container {
+      width: 85%;
       text-align: center;
       position: absolute;
       top: 50%;
@@ -637,14 +638,23 @@
     const { useState, useEffect, useRef, useMemo } = React;
 
     const App = () => {
-      const [currentStage, setCurrentStage] = useState('loading');
+      const birthdayTarget = useMemo(() => new Date('2025-12-31T00:00:00').getTime(), []);
+
+      const [currentStage, setCurrentStage] = useState(() => {
+        const now = new Date().getTime();
+        return now >= new Date('2025-12-31T00:00:00').getTime() ? 'loading' : 'countdown';
+      });
+
       const [progress, setProgress] = useState(0);
       const [typingComplete, setTypingComplete] = useState(false);
       const [showCursor, setShowCursor] = useState(true);
 
+      // Birthday Countdown State
+      const [birthdayTimeData, setBirthdayTimeData] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
       // Timer state
       const [timeData, setTimeData] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-      const startTime = useMemo(() => new Date('2025-12-21').getTime(), []);
+      const startTime = useMemo(() => new Date('2025-12-31').getTime(), []);
 
       // Typing state
       const [displayedLines, setDisplayedLines] = useState([]);
@@ -664,17 +674,56 @@
       const currentLineIndexRef = useRef(0);
       const currentCharIndexRef = useRef(0);
       const timerIntervalRef = useRef(null);
+      const birthdayTimerRef = useRef(null);
+      const loadingStartedRef = useRef(false);
 
       // Lifecycle: Mounted
       useEffect(() => {
-        startLoading();
         recordVisit();
-        startTimer();
+        startTimer(); // Relationship timer always runs
 
         return () => {
           if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+          if (birthdayTimerRef.current) clearInterval(birthdayTimerRef.current);
         };
       }, []);
+
+      // Effect for Countdown Stage
+      useEffect(() => {
+        if (currentStage === 'countdown') {
+          const updateCountdown = () => {
+            const now = new Date().getTime();
+            const distance = birthdayTarget - now;
+
+            if (distance <= 0) {
+              if (birthdayTimerRef.current) clearInterval(birthdayTimerRef.current);
+              setCurrentStage('loading');
+            } else {
+              setBirthdayTimeData({
+                days: Math.floor(distance / (1000 * 60 * 60 * 24)),
+                hours: Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+                minutes: Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60)),
+                seconds: Math.floor((distance % (1000 * 60)) / 1000)
+              });
+            }
+          };
+
+          updateCountdown(); // Initial call
+          birthdayTimerRef.current = setInterval(updateCountdown, 1000);
+
+          return () => {
+            if (birthdayTimerRef.current) clearInterval(birthdayTimerRef.current);
+          };
+        }
+      }, [currentStage, birthdayTarget]);
+
+      // Effect to trigger loading when stage changes to loading
+      useEffect(() => {
+        if (currentStage === 'loading' && !loadingStartedRef.current) {
+          loadingStartedRef.current = true;
+          startLoading();
+        }
+      }, [currentStage]);
 
       const startTimer = () => {
         timerIntervalRef.current = setInterval(() => {
@@ -836,6 +885,23 @@
 
       return (
         <div style={{ width: '100%' }}>
+          {currentStage === 'countdown' && (
+            <div className="loading-container">
+              <div style={{ marginBottom: '.5rem', color: '#555', fontSize: '1.1rem', fontWeight: 300, letterSpacing: '1px' }}>
+                To 亲爱的婷，
+              </div>
+              <div style={{ marginBottom: '1.5rem', color: '#555', fontSize: '1.1rem', fontWeight: 300, letterSpacing: '1px' }}>
+                距离你的生日惊喜解锁还剩
+              </div>
+              <div className="progress-text" style={{ fontSize: '2.5rem', fontFamily: 'monospace', fontWeight: 'bold', color: '#333' }}>
+                {String(birthdayTimeData.days).padStart(2, '0')}天 {String(birthdayTimeData.hours).padStart(2, '0')}时 <br /> {String(birthdayTimeData.minutes).padStart(2, '0')}分 {String(birthdayTimeData.seconds).padStart(2, '0')}秒
+              </div>
+              <div className="loading-hint" style={{ opacity: 1, animation: 'none', marginTop: '1.5rem' }}>
+                愿这份微光能温暖你的眼角眉梢 🎁
+              </div>
+            </div>
+          )}
+
           {currentStage === 'loading' && (
             <div className="loading-container">
               <div className="progress-text">{Math.floor(progress)}%</div>
@@ -875,7 +941,7 @@
               <div className="hearts" id="hearts"></div>
 
               <div className="glass-card">
-                <h1 className="main-title">谌雅婷</h1>
+                <h1 className="main-title">谌雅婷Baby</h1>
                 <h2 className="main-title">我爱你</h2>
 
                 <div className="love-timer">
