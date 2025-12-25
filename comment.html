@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>抖音评论打印页 - 祝谌雅婷生日快乐</title>
+  <!-- Vue 2 Runtime -->
+  <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.min.js"></script>
+  <!-- html2canvas for screenshot -->
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <style>
+    /* Reset & Base */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #f0f0f0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* A4 Page Layout */
+    .page {
+      width: 210mm;
+      height: 297mm;
+      background: white;
+      margin: 0 auto;
+      padding: 10mm;
+      /* Reduced padding to fit more */
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-wrap: wrap;
+      /* Enable grid layout */
+      align-content: flex-start;
+      justify-content: space-between;
+    }
+
+    /* Print Settings */
+    @media print {
+      body {
+        background: white;
+      }
+
+      .page {
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 15mm;
+        box-shadow: none;
+      }
+
+      .no-print {
+        display: none;
+      }
+    }
+
+    /* Comment Item Style */
+    .comment-item {
+      width: 48%;
+      /* Two columns with gap */
+      display: flex;
+      align-items: flex-start;
+      padding: 10px 0;
+      /* Reduced padding */
+      border-bottom: 1px dashed #eee;
+      page-break-inside: avoid;
+      margin-bottom: 5px;
+    }
+
+    /* Avatar */
+    .avatar {
+      width: 32px;
+      /* Smaller avatar */
+      height: 32px;
+      border-radius: 50%;
+      margin-right: 10px;
+      object-fit: cover;
+      flex-shrink: 0;
+      border: 1px solid #f0f0f0;
+    }
+
+    /* Content Area */
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+
+      font-weight: 600;
+      /* Prevent flex overflow */
+    }
+
+    .nickname {
+      font-size: 12px;
+      /* Smaller font */
+      color: #aeadb2;
+      margin-bottom: 3px;
+      font-weight: 600;
+    }
+
+    .comment-text {
+      font-size: 13px;
+      /* Smaller font */
+      color: #181820;
+      line-height: 1.4;
+      margin-bottom: 6px;
+      font-weight: 600;
+      /* Slightly bolder for text as per image */
+    }
+
+    /* Footer Row: Meta + Icons */
+    .footer-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
+
+    .meta-info {
+      font-size: 11px;
+      /* Smaller meta */
+      color: #b1b2b6;
+      display: flex;
+      align-items: center;
+    }
+
+    .meta-dot {
+      width: 2px;
+      height: 2px;
+      background-color: #999;
+      border-radius: 50%;
+      margin: 0 5px;
+      display: inline-block;
+      vertical-align: middle;
+    }
+
+    /* Action Icons Area */
+    .actions {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      /* Space between heart and broken heart */
+      padding-right: 5px;
+    }
+
+    .action-icon {
+      width: 20px;
+      height: 20px;
+      color: #737277;
+      fill: currentColor;
+      /* Use text color for fill */
+      /* Remove stroke if the path is filled */
+    }
+
+    .like-count {
+      font-size: 11px;
+      color: #737277;
+      margin-left: -2px;
+      font-weight: 600;
+    }
+
+    /* Adjust spacing for grid */
+    .page>.comment-item:nth-child(2n) {
+      margin-left: 4%;
+      /* Gap between columns */
+    }
+
+    .comment-item {
+      width: 48%;
+      /* Two columns with gap */
+      display: flex;
+      align-items: flex-start;
+      padding: 8px 0;
+      /* Reduced padding */
+      border-bottom: 1px dashed #eee;
+      page-break-inside: avoid;
+      margin-bottom: 2px;
+    }
+
+    /* Export Button Style */
+    .export-container {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .export-btn {
+      background: linear-gradient(135deg, #ff0050, #ff4081);
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 25px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(255, 0, 80, 0.3);
+    }
+
+    .export-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 0, 80, 0.4);
+    }
+
+    .export-btn:active {
+      transform: translateY(0);
+    }
+
+    .export-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    /* Hide export button in print */
+    @media print {
+      .export-container {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="app">
+    <!-- Export Button -->
+    <!-- <div class="export-container">
+      <button class="export-btn" @click="exportToImage" :disabled="isExporting">
+        {{ isExporting ? '导出中...' : '📸 导出为图片' }}
+      </button>
+    </div> -->
+
+    <div class="page" id="export-page">
+      <div v-for="(comment, index) in comments" :key="index" class="comment-item">
+        <img :src="comment.avatar" class="avatar" alt="avatar">
+        <div class="content-area">
+          <div class="nickname">{{ comment.nickname }}</div>
+          <div class="comment-text">
+
+            <span v-if="comment.com">{{ comment.com }}</span>
+            <span v-else>我在{{ comment.province }}祝谌雅婷19岁生日快乐</span>
+            <span v-if="comment.emoji">{{ comment.emoji }}</span>
+          </div>
+
+          <div class="footer-row">
+            <div class="meta-info">
+              <span>{{ comment.time }}</span>
+              <span class="meta-dot"></span>
+              <span>{{ comment.province }}</span>
+              &nbsp;&nbsp;&nbsp;
+              <span style="color:#727377;font-weight: bold;">回复</span>
+            </div>
+
+            <div class="actions">
+              <!-- Like Icon -->
+              <svg class="action-icon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path fill-rule="evenodd" clip-rule="evenodd"
+                  d="M7.646 4.168c-2.238 0-4.035 1.919-4.035 4.152l.002.13a.834.834 0 0 0-.001.073c.006.3.075.66.15.962.074.294.178.622.294.86.467 1.004 1.284 1.979 2.071 2.78a23.69 23.69 0 0 0 2.646 2.323l.015.012.012.01c.174.175.543.54 1.2.54h.019c.186 0 .63 0 1.028-.387l.033-.027c.033-.029.08-.067.14-.117l.003-.003c.436-.359 1.456-1.2 2.462-2.214.644-.646 1.312-1.396 1.822-2.17a7.94 7.94 0 0 0 .2-.318.84.84 0 0 0 .063-.13.956.956 0 0 1 .11-.214.835.835 0 0 0 .074-.144c.029-.073.05-.121.066-.154l.003-.007a.832.832 0 0 0 .147-.29c.125-.444.21-.835.219-1.316a.82.82 0 0 0-.002-.067 5.39 5.39 0 0 0 .002-.16c-.015-2.22-1.807-4.124-4.035-4.124-.845 0-1.667.262-2.316.789a4.029 4.029 0 0 0-2.392-.789zm7.076 4.153V8.424l-.002.07c0 .008 0 .022.002.039a3.065 3.065 0 0 1-.121.721 1.9 1.9 0 0 0-.078.144 3.297 3.297 0 0 0-.089.2c-.083.135-.137.24-.193.38a6.64 6.64 0 0 1-.124.195v.001c-.425.644-1.007 1.305-1.613 1.912l-.002.001a31.607 31.607 0 0 1-2.342 2.106l-.032.026-.12.1-.048-.046c-.05-.05-.119-.105-.152-.131l-.006-.005A22.003 22.003 0 0 1 7.32 11.96l-.003-.003c-.747-.76-1.408-1.577-1.753-2.323a3.149 3.149 0 0 1-.185-.555 3.468 3.468 0 0 1-.1-.553.964.964 0 0 0 0-.104V8.42a3.56 3.56 0 0 1-.001-.099c0-1.373 1.11-2.485 2.368-2.485.662 0 1.288.269 1.848.85a.833.833 0 0 0 1.282-.099c.33-.47.892-.751 1.578-.751 1.258 0 2.368 1.113 2.368 2.485z"
+                  fill="currentColor"></path>
+              </svg>
+              <span class="like-count">{{ comment.likes }}</span>
+
+              <!-- Broken Heart Icon -->
+              <svg class="action-icon" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M15.58 8.58c0 .1 0 .21-.01.31v.13l-.01.06c-.04.44-.13.8-.27 1.22-.02.08-.06.15-.12.21h.01c-.04.07-.07.13-.1.19a.37.37 0 0 1-.05.11c-.07.11-.09.14-.13.23-.01.04-.03.07-.05.1-.67 1.09-1.71 2.14-2.56 2.91-.43.39-.83.72-1.12.97-.13.1-.25.19-.33.26l-.03.03-.11.08h-.01l-.01.02h-.01c-.1.11-.33.33-.67.41h-.01c-.09.04-.19.07-.29.08-.58.08-.95-.23-1.11-.37l-.03-.03c-.64-.45-1.27-.93-1.87-1.43-.98-.83-2.16-1.95-2.84-3.13-.14-.24-.26-.5-.36-.77-.11-.29-.2-.59-.25-.89h-.01v-.06l-.02-.14c-.29-2.05.92-4.16 2.92-4.45.15-.02.29-.03.43-.03.88 0 1.7.36 2.41.99.14.13.23.31.23.5l.02 1.29 1.3.96c.14.1.23.26.26.44.03.17-.01.35-.12.5l-.94 1.32.63 1.34c.07.17.08.35.02.51a.69.69 0 0 1-.35.38c-.16.08-.34.09-.51.03a.67.67 0 0 1-.38-.34l-.81-1.7a.702.702 0 0 1-.06-.35c.01-.12.05-.23.12-.33l.79-1.11-1.02-.76a.55.55 0 0 1-.2-.23.641.641 0 0 1-.08-.3l-.02-1.31c-.43-.32-.86-.47-1.28-.47-.08 0-.17 0-.25.02-1.07.15-1.98 1.39-1.77 2.92l.02.1v.02s.01.05.01.08c.03.14.09.36.18.59.09.26.19.46.24.55h.01c.57.98 1.6 1.98 2.55 2.79.54.45 1.09.87 1.66 1.28l.03.02c.07.06.16.12.2.15.03.03.06.05.09.07.03-.01.07-.02.11-.03l.09-.09c.05-.04.13-.11.2-.16l.02-.02.03-.03.32-.26c.36-.29.72-.6 1.07-.91.81-.74 1.72-1.67 2.29-2.58.06-.13.11-.23.19-.36.03-.06.06-.13.09-.19.02-.04.05-.09.09-.14.09-.31.14-.53.17-.78v-.2c.12-1.49-.85-2.63-1.89-2.7h-.12c-.57 0-1.19.26-1.49.68-.05.07-.11.14-.19.18a.55.55 0 0 1-.25.1c-.09.02-.18.02-.27 0a.545.545 0 0 1-.24-.12.54.54 0 0 1-.18-.19.825.825 0 0 1-.1-.26.576.576 0 0 1 .02-.26c.02-.09.06-.17.11-.24.6-.84 1.67-1.25 2.59-1.25.08 0 .15 0 .22.01 1.87.12 3.16 1.92 3.16 3.83z"
+                  fill="currentColor"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        isExporting: false,
+        provinces: [
+          '北京', '天津', '河北', '山西', '内蒙古', '辽宁', '吉林', '黑龙江',
+          '上海', '江苏', '浙江', '安徽', '福建', '江西', '山东', '河南',
+          '湖北', '湖南', '广东', '广西', '海南', '重庆', '四川', '贵州',
+          '云南', '西藏', '陕西', '甘肃', '青海', '宁夏', '新疆',
+          '台湾', '香港', '澳门'
+        ],
+        nicknames: [
+          '青瓜不是黄瓜', '冷接触', '譹', '一只琪', '白菜·', '怡仔.', '咕噜咕噜漁',
+          '꒰ঌShᰔᩚa໒꒱', '一团周', '清风吹', '🐰우기🤍', '暴雨', 'sisnekux', '加贝.',
+          '月亮不睡觉', '小王超爱螺蛳粉', '丰年', '腼腆小麻花', '⊹阮冬❅₊', '⠀⠀⠀ᵉⁿ',
+          '契机莺', '＆', 'om恩齐', '嘟嘟嘟', "Lay's原味🍟", '何以解忧', '小琳困困',
+          '哦呐呐呐', '岛屿.', '十五-', '张家老汉', '阿妍.', '别吃我蛋糕', '秋刀鱼.',
+          '数学学不会', '連星', '惰性.', 'Victoria Lynn', 'yy', '清蒸魚.', '开心小丽',
+          '屋顶橙子味waᴗngಣ', 'yyy', '默念', '陈周zhou', '白居易', '大脸妹er', 'Verity',
+          '祁筱贤', '用户zbejdn37291', '烦薯你～', '泥•烂的', 'Qqqqqq❤️‍🔥💚🐼.',
+          '衔雪寄思小禾', '浔念', '6666666', '小小cpr', '萍水之交', '⭐', '逾期',
+          '南萱米桃', '苹果味虾条', '舒.', '在雨天养鱼_', 'ʕ•̫͡•ʔ', '时菀', '等誓言',
+          '平安de“平”', '爱吃土豆粉的荷包蛋', '⁺✞ʚ雨宫莲重度依赖ɞ✟₊', '慢慢', '锅巴大王',
+          '平安de“平”', '晞阳', '糯昔🐤', '雾昂', '陈陈姓陈不姓臣', '。', 'www',
+          '日落时收尾', '妮妮^', '续.LuBai', 'ai7琦', '年糕.', '💤', '汐^',
+          '用户8596632147', '豆包.', '江婉竹', 'ai7琦', '不是谁的影子（不自律一年不改名）',
+          '— —', '小宅', '每天都好困', '葡萄柚', '伤害女人的事我做不到', '忘川。',
+          '愛永不凋零', '零勾不吃就按头（已有🐢）', '杳栀♡'
+        ],
+        emojis: ['🎂', '🎉', '❤️', '🌹', '✨', '🥰', '🎈', '🎁'],
+        comments: []
+      },
+      created() {
+        this.generateComments();
+      },
+      methods: {
+        generateComments() {
+          // Aim for about 24 comments to fit A4 2-column layout comfortably
+          const count = 23;
+          const usedProvinces = new Set();
+
+          this.comments.push({
+            avatar: "https://p3-pc-sign.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_640c38b927daae4cb56ea8993ec1737e.jpeg?lk3s=93de098e&x-expires=1766818800&x-signature=4G4D9k0fi2RUz3hiwTb9%2FtuFH40%3D&from=2480802190&s=profile&se=false&sc=avatar&l=20251225150648CBDC8C6990E1B0E14EEF",
+            nickname: '倒霉熊',
+            province: '北京朝阳',
+            time: `13:14`,
+            com: '我在北京朝阳祝我的宝宝谌雅婷19岁生日快乐',
+            likes: 5201314
+
+          });
+
+          for (let i = 0; i < count; i++) {
+            // Ensure unique provinces as much as possible
+            let provinceIndex = Math.floor(Math.random() * this.provinces.length);
+            let province = this.provinces[provinceIndex];
+            // Allow repeats if we exceed province list size, but try to distribute
+            if (i < this.provinces.length) {
+              let attempts = 0;
+              while (usedProvinces.has(province) && attempts < 10) {
+                provinceIndex = (provinceIndex + 1) % this.provinces.length;
+                province = this.provinces[provinceIndex];
+                attempts++;
+              }
+            }
+            usedProvinces.add(province);
+
+            // Real Douyin Avatars List
+            const realAvatars = [
+              'https://p3-pc-sign.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_640c38b927daae4cb56ea8993ec1737e.jpeg?lk3s=93de098e&x-expires=1766815200&x-signature=HxmsUDU2dafWVJuCWBLhf5lvM6M%3D&from=2480802190&s=profile&se=false&sc=avatar&l=2025122514390702872358D73984D4662D',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_oAFkQA7pKAg9AaMAEfExA9GCCyrfI1gAAF6gED.jpeg?card_type=303&column_n=0&from=327834062',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_a15c0b072a67d0fcbf8fe387c48d02a2.jpeg?card_type=303&column_n=0&from=327834062',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_ocEKIAEA91NSATDpfFBGfIxddXiAEEAweEtcEt.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_ocxsHqgdfAIfdjD6AD9m8YCckEANFAAXpkAQzs.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_b0f0e8f26835ec6dbdd60a21e21f3c2a.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_oAAjAA2TDjvPmCYiNsprraIYBAIaQihigAoAE.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_oYgSSAD9EBEEAA9MfBAAICAFfmlgZT4e6zY7GN.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_oMLeAAnE9DRfgZABFgAxBIAJEAKpamDwTwnAFC.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_2512a2093875358451a790895e3ee2d1.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_oIE9kRQ67GYRAfDnEwfIFYAeAjImYAhEEW3o0A.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_o4E0INDnANbAxAOArkqeAPaQQAeUZ9AnWDCEhg.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_2fd208a6eb34a85a5c5fe7ea26d17523.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_oYO82DefkIgADATmOKfWLBqQQfMA0wAWtA83qR.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_167e53f1d2ef9707acb9dc64b0d2dba0.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_o45WoAfQQjQAUL7CBfgmI3FEEfA2ASOnDGJiFF.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_oMnX5AfV8CQAy87ABng2IcFEQcALASLeDuJfEr.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_09fbc35e5dac4953dfc52f3f66baf2bd.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_f01e490c1f21940c4177f2077a6257ad.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_ca44fd1b6e3601cd5452cbaaccfe6dfb.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_5511ff532ee19d145a41af54923b96cc.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_cf6946a3c021fcb18a8e427034328745.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_okAAewIIEBAPZSsecJLGYFD0egwbzBAXGEE7A2.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_osIo2SgQEfDAKOfFDmFSASNbiAJJ7BAAIavGfa.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_o0p8jdPCiMiJAWHAPFCmiA9UnYliAIUEhaBA1.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_c1f52ada25e9c88cc0a36cbc28f30e2d.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_1ced3a9c13f3dff2525bed817b84401f.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_oQCdgQDAAQSAFBAf48fE74X06qPeXlBBAEJWhI.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_635a8a615c644f485e6901e3449358d4.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_oUg1E7CpAgAIEB9MAi3yfAsAMQ9BTi3eMCZzFA.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_okfIA5lEWIEgOAUpAQAI9aNFIfAddjADADbCg1.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_062b40d3c4444aa9c520366718ba87e0.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_1dd519710d3e01c62ebcbf2f37848b38.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_os82teIHHABkgzIeDd3pOeAQGeAbLCAt6IAdZg.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_a2eed520fc7f553432e0dadd635c87e8.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_af51496373885ef53d698db22ce8f803.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_o06XQvcRGIbAiGAAFEQAaAGPjnAIIapBin9Wa.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_1e93de4c3425f2132a99dade1d7e04a7.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813_oMERkLnMIeAQQfE0oADaAyBABUeYb76TJlBHAB.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_de8edadd44e4e15fafa5d75d17221533.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_ogTyAmhCAAANAevbgEfblENzINaSIJQhAACAqI.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_b0868f018af0059e7fa3515ff661d09d.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_f01f05394df539fba9db0898fa6ce7c5.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_9f6715490e8297a1271536a6a47161a0.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_ogfpFc9AAnDGKb4EgMFGIEAYEfANIwEzzsAeCA.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_143982a7c0fb4532392f4a8eb6eb37a1.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_ogNElkoD7CAfX9pEAIMALAAB95ug1yYyzAechD.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/aweme_default_avatar.png.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c000-ce_oYA8EiWyTFM0ALBhtniaclPAAhcwBuyEAIiPb.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/mosaic-legacy_26e860000cb3504bb66b9.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_oMMxHANDpCfsvPRFEAAnwAIrAAoUfSzg69QGCs.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_ogGrAI2AxQPpDLzB2GMeGgrEenAeE7A7lRITAB.jpeg?from=2064092626',
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_48c4bedd247b4cfa83268a3ba4bb2d0c.jpeg?card_type=153&column_n=0&from=327834062'
+            ];
+
+            // Random Nickname
+            const nickname = this.nicknames[Math.floor(Math.random() * this.nicknames.length)];
+
+            // Random Time (1-5 days ago)
+            const daysAgo = Math.floor(Math.random() * 5) + 1;
+
+            // Random Likes
+            const likes = Math.floor(Math.random() * 100);
+
+            // Random Emoji
+            const emoji = Math.random() > 0.5 ? this.emojis[Math.floor(Math.random() * this.emojis.length)] : '';
+
+            this.comments.push({
+              avatar: realAvatars[Math.floor(Math.random() * realAvatars.length)],
+              nickname: nickname,
+              province: province,
+              time: `${daysAgo}天前`,
+              likes: '',
+              emoji: emoji
+            });
+          }
+        },
+        async exportToImage() {
+          this.isExporting = true;
+          try {
+            // Wait for images to load
+            await Promise.all(
+              Array.from(document.querySelectorAll('.avatar')).map(img => {
+                if (img.complete) return Promise.resolve();
+                return new Promise(resolve => {
+                  img.onload = resolve;
+                  img.onerror = resolve;
+                });
+              })
+            );
+
+            // Capture the page
+            const element = document.getElementById('export-page');
+            const canvas = await html2canvas(element, {
+              scale: 2, // Higher resolution for better print quality
+              useCORS: true,
+              allowTaint: true,
+              backgroundColor: '#ffffff',
+              width: element.offsetWidth,
+              height: element.offsetHeight,
+              scrollX: 0,
+              scrollY: 0
+            });
+
+            // Convert to blob and download
+            canvas.toBlob((blob) => {
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.download = `谌雅婷生日快乐_${new Date().getTime()}.png`;
+              link.style.display = 'none';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+
+              // Show success message
+              this.$nextTick(() => {
+                alert('图片导出成功！请查看下载文件。');
+              });
+            }, 'image/png', 1.0);
+
+          } catch (error) {
+            console.error('导出失败:', error);
+            alert('导出失败，请重试。');
+          } finally {
+            this.isExporting = false;
+          }
+        }
+      }
+    });
+  </script>
+</body>
+
+</html>

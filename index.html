@@ -638,11 +638,11 @@
     const { useState, useEffect, useRef, useMemo } = React;
 
     const App = () => {
-      const birthdayTarget = useMemo(() => new Date('2025-12-31T00:00:00').getTime(), []);
+      const birthdayTarget = useMemo(() => new Date('2025-12-21T00:00:00').getTime(), []);
 
       const [currentStage, setCurrentStage] = useState(() => {
         const now = new Date().getTime();
-        return now >= new Date('2025-12-31T00:00:00').getTime() ? 'loading' : 'countdown';
+        return now >= new Date('2025-12-21T00:00:00').getTime() ? 'loading' : 'countdown';
       });
 
       const [progress, setProgress] = useState(0);
@@ -654,7 +654,7 @@
 
       // Timer state
       const [timeData, setTimeData] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-      const startTime = useMemo(() => new Date('2025-12-31').getTime(), []);
+      const startTime = useMemo(() => new Date('2025-12-20').getTime(), []);
 
       // Typing state
       const [displayedLines, setDisplayedLines] = useState([]);
@@ -927,7 +927,7 @@
                   className={`continue-btn ${typingComplete ? 'show' : ''}`}
                   onClick={continueToMain}
                 >
-                  继续前往下一份幸福 💕
+                  继续通往下一关 💕
                   <span className="arrow-icon">→</span>
                 </button>
               )}
@@ -941,8 +941,8 @@
               <div className="hearts" id="hearts"></div>
 
               <div className="glass-card">
-                <h1 className="main-title">谌雅婷Baby</h1>
                 <h2 className="main-title">我爱你</h2>
+                <h1 className="main-title">谌雅婷</h1>
 
                 <div className="love-timer">
                   <div className="timer-label">今天是我们在一起的</div>
@@ -955,13 +955,13 @@
                 </div>
 
                 <div className="content">
-                  <p className="love-quote">"遇见你，是所有故事的开始"</p>
+                  <p className="love-quote">"不太懂爱我只知道有你在我身边就是幸福"</p>
                   <p className="love-quote">对你的爱，从来不只是嘴上说说</p>
                   <p className="love-quote">而是如清水一般清澈、透明</p>
                   <p className="subtitle" style={{ margin: '1rem 0' }}>(●'◡'●)</p>
 
                   <a href="mcdull.html" className="action-button">
-                    开启专属旅程 <span class="arrow-icon">→</span>
+                    开启生日专属 <span class="arrow-icon">→</span>
                   </a>
                 </div>
 
