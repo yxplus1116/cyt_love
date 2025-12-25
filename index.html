@@ -638,11 +638,11 @@
     const { useState, useEffect, useRef, useMemo } = React;
 
     const App = () => {
-      const birthdayTarget = useMemo(() => new Date('2025-12-21T00:00:00').getTime(), []);
+      const birthdayTarget = useMemo(() => new Date('2025-12-31T00:00:00').getTime(), []);
 
       const [currentStage, setCurrentStage] = useState(() => {
         const now = new Date().getTime();
-        return now >= new Date('2025-12-21T00:00:00').getTime() ? 'loading' : 'countdown';
+        return now >= new Date('2025-12-31T00:00:00').getTime() ? 'loading' : 'countdown';
       });
 
       const [progress, setProgress] = useState(0);
