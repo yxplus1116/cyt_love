@@ -851,15 +851,13 @@
 
 <body>
   <div id="root" style="width:100%;"></div>
-  <audio id="bgm"
-    src="https://cdn-cf-audio.kfs.io/201307/2dsuYe8ggn50mWxQw_ATUpRWOGCxRsjMPhh2955AfJXX2Hs=?Expires=1766714002&Signature=J9smpQUpyYXNgUvkoSIsfumQHLlwy0qQmI4MxGT~yXcQZ31iLYnf0hP6uJn42gqiufPpSRASFktcr9a2wZzvLdWpRnWrN6~we3V7IpLw5kS27md7EUlWBXEzSU6hhF7EMJ3MHA3GpJ~aXHVFBoaURwAWFL1XmTKxOKRbaHxZNjRGky0M1kTKus3hK3I1wjpncJPJvLPDQ8F1-jaIFucETLfUNxP0nd4iXCpeY8CVbjsNey8DegQhmelO29NWGfDy9lvk9cGSKJgwDz8ro1BdVEPPzoNisD062zcI35NSnsITKPmr1Bo6dlx0BipZgDV04-rYbs1ifNo1i02i9OuDxg__&Key-Pair-Id=K1F0JP1SHHF6IL"
-    preload="auto" loop></audio>
+  <audio id="bgm" src="/bgm.mp3" preload="auto" loop></audio>
 
   <script type="text/babel">
     const { useState, useEffect, useRef, useMemo } = React;
 
     const App = () => {
-      const TARGET_DATE = '2025-12-31T00:00:00';
+      const TARGET_DATE = '2025-12-21T00:00:00';
       const birthdayTarget = useMemo(() => new Date(TARGET_DATE).getTime(), []);
 
       const [currentStage, setCurrentStage] = useState(() => {
@@ -1131,7 +1129,9 @@
               <div className="welcome-text">
                 <p>抱歉让你久等了</p>
                 <p>但这漫长的准备</p>
+                <p>我只想尽我所能</p>
                 <p>只为把最好的一切都给你</p>
+                <p>让你成为人们眼中所认为的幸福女孩</p>
                 <div className="divider"></div>
               </div>
 

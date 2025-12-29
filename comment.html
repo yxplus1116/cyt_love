@@ -229,11 +229,11 @@
 <body>
   <div id="app">
     <!-- Export Button -->
-    <!-- <div class="export-container">
+    <div class="export-container">
       <button class="export-btn" @click="exportToImage" :disabled="isExporting">
         {{ isExporting ? '导出中...' : '📸 导出为图片' }}
       </button>
-    </div> -->
+    </div>
 
     <div class="page" id="export-page">
       <div v-for="(comment, index) in comments" :key="index" class="comment-item">
@@ -306,7 +306,7 @@
           '日落时收尾', '妮妮^', '续.LuBai', 'ai7琦', '年糕.', '💤', '汐^',
           '用户8596632147', '豆包.', '江婉竹', 'ai7琦', '不是谁的影子（不自律一年不改名）',
           '— —', '小宅', '每天都好困', '葡萄柚', '伤害女人的事我做不到', '忘川。',
-          '愛永不凋零', '零勾不吃就按头（已有🐢）', '杳栀♡'
+          '愛永不凋零', '零勾不吃就按头（已有🐢）', '杳栀♡', 'love', '爱你', '我爱你'
         ],
         emojis: ['🎂', '🎉', '❤️', '🌹', '✨', '🥰', '🎈', '🎁'],
         comments: []
@@ -399,7 +399,8 @@
               'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/mosaic-legacy_26e860000cb3504bb66b9.jpeg?from=2064092626',
               'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_oMMxHANDpCfsvPRFEAAnwAIrAAoUfSzg69QGCs.jpeg?from=2064092626',
               'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-i-0813c001_ogGrAI2AxQPpDLzB2GMeGgrEenAeE7A7lRITAB.jpeg?from=2064092626',
-              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_48c4bedd247b4cfa83268a3ba4bb2d0c.jpeg?card_type=153&column_n=0&from=327834062'
+              'https://p3-pc.douyinpic.com/aweme/100x100/aweme-avatar/tos-cn-avt-0015_48c4bedd247b4cfa83268a3ba4bb2d0c.jpeg?card_type=153&column_n=0&from=327834062',
+
             ];
 
             // Random Nickname
