@@ -477,6 +477,92 @@
       }
     }
 
+    /* 滚动提示样式 */
+    .scroll-indicator {
+      position: fixed;
+      bottom: 40px;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      color: #888;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 1s ease;
+      z-index: 100;
+    }
+
+    .scroll-indicator.show {
+      opacity: 1;
+      animation: bounce 2s infinite;
+    }
+
+    .scroll-arrow {
+      width: 24px;
+      height: 24px;
+      border-right: 2px solid #999;
+      border-bottom: 2px solid #999;
+      transform: rotate(45deg);
+      margin: 0 auto 8px;
+    }
+
+    .scroll-text {
+      font-size: 0.85rem;
+      letter-spacing: 2px;
+      font-weight: 300;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      20%,
+      50%,
+      80%,
+      100% {
+        transform: translateX(-50%) translateY(0);
+      }
+
+      40% {
+        transform: translateX(-50%) translateY(-10px);
+      }
+
+      60% {
+        transform: translateX(-50%) translateY(-5px);
+      }
+    }
+
+    /* 页面切换动画 */
+    .slide-up-exit {
+      animation: slideOutUp 0.8s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+    }
+
+    .slide-up-enter {
+      animation: slideInUp 0.8s cubic-bezier(0.4, 0.0, 0.2, 1) forwards;
+    }
+
+    @keyframes slideOutUp {
+      from {
+        opacity: 1;
+        transform: translateY(0);
+      }
+
+      to {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.95);
+      }
+    }
+
+    @keyframes slideInUp {
+      from {
+        opacity: 0;
+        transform: translateY(100px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
     @keyframes fadeIn {
       to {
         opacity: 1;
@@ -857,7 +943,7 @@
     const { useState, useEffect, useRef, useMemo } = React;
 
     const App = () => {
-      const TARGET_DATE = '2025-12-31T00:00:00';
+      const TARGET_DATE = '2025-12-21T00:00:00';
       const birthdayTarget = useMemo(() => new Date(TARGET_DATE).getTime(), []);
 
       const [currentStage, setCurrentStage] = useState(() => {
@@ -898,6 +984,10 @@
       const timerIntervalRef = useRef(null);
       const birthdayTimerRef = useRef(null);
       const loadingStartedRef = useRef(false);
+
+      const [isTransitioning, setIsTransitioning] = useState(false);
+      const touchStartY = useRef(0);
+      const canScrollRef = useRef(false);
 
       const handleStart = () => {
         // Play music
@@ -1035,14 +1125,46 @@
         setTypingComplete(true);
         setTimeout(() => {
           setShowCursor(false);
+          canScrollRef.current = true;
         }, 2000);
       };
 
       const continueToMain = () => {
-        setCurrentStage('main');
-        document.body.classList.add('typing-complete');
-        // Wait for DOM update
-        setTimeout(createBackgroundEffects, 100);
+        if (isTransitioning) return;
+        setIsTransitioning(true);
+
+        setTimeout(() => {
+          setCurrentStage('main');
+          document.body.classList.add('typing-complete');
+          setTimeout(createBackgroundEffects, 100);
+          setIsTransitioning(false);
+        }, 800);
+      };
+
+      // 触摸事件处理
+      const handleTouchStart = (e) => {
+        touchStartY.current = e.touches[0].clientY;
+      };
+
+      const handleTouchEnd = (e) => {
+        if (!canScrollRef.current || currentStage !== 'typing') return;
+
+        const touchEndY = e.changedTouches[0].clientY;
+        const diff = touchStartY.current - touchEndY;
+
+        // 向上滑动超过 50px 触发
+        if (diff > 50) {
+          continueToMain();
+        }
+      };
+
+      // 鼠标滚轮处理
+      const handleWheel = (e) => {
+        if (!canScrollRef.current || currentStage !== 'typing') return;
+
+        if (e.deltaY > 20) {
+          continueToMain();
+        }
       };
 
       const recordVisit = () => {
@@ -1170,7 +1292,13 @@
           )}
 
           {currentStage === 'typing' && (
-            <div className="typing-container" style={{ opacity: 1 }}>
+            <div
+              className={`typing-container ${isTransitioning ? 'slide-up-exit' : ''}`}
+              style={{ opacity: 1 }}
+              onTouchStart={handleTouchStart}
+              onTouchEnd={handleTouchEnd}
+              onWheel={handleWheel}
+            >
               <div className="typing-text">
                 {displayedLines.map((line, index) => (
                   <div key={index} className="line">
@@ -1179,20 +1307,19 @@
                   </div>
                 ))}
               </div>
-              {typingComplete && (
-                <button
-                  className={`continue-btn ${typingComplete ? 'show' : ''}`}
-                  onClick={continueToMain}
-                >
-                  继续通往下一关 💕
-                  <span className="arrow-icon">→</span>
-                </button>
-              )}
+
+              <div
+                className={`scroll-indicator ${typingComplete ? 'show' : ''}`}
+                onClick={continueToMain}
+              >
+                <div className="scroll-arrow"></div>
+                <div className="scroll-text">上滑继续</div>
+              </div>
             </div>
           )}
 
           {currentStage === 'main' && (
-            <div className={`original-content ${currentStage === 'main' ? 'show' : ''}`}>
+            <div className={`original-content ${currentStage === 'main' ? 'show slide-up-enter' : ''}`}>
               <div className="stars" id="stars"></div>
               <div className="petals" id="petals"></div>
               <div className="hearts" id="hearts"></div>
@@ -1205,9 +1332,9 @@
                   <div className="timer-label">今天是我们在一起的</div>
                   <div className="timer-digits">
                     <span>{timeData.days}天</span>
-                    <span>{timeData.hours}时</span>
-                    <span>{timeData.minutes}分</span>
-                    <span>{timeData.seconds}秒</span>
+                    <span>{String(timeData.hours).padStart(2, '0')}时</span>
+                    <span>{String(timeData.minutes).padStart(2, '0')}分</span>
+                    <span>{String(timeData.seconds).padStart(2, '0')}秒</span>
                   </div>
                 </div>
 
