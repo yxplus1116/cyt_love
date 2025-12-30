@@ -497,10 +497,10 @@
     }
 
     .scroll-arrow {
-      width: 24px;
-      height: 24px;
-      border-right: 2px solid #999;
-      border-bottom: 2px solid #999;
+      width: 12px;
+      height: 12px;
+      border-right: 1px solid #ddc6c6;
+      border-bottom: 1px solid #ddc6c6;
       transform: rotate(45deg);
       margin: 0 auto 8px;
     }
@@ -943,7 +943,7 @@
     const { useState, useEffect, useRef, useMemo } = React;
 
     const App = () => {
-      const TARGET_DATE = '2025-12-31T00:00:00';
+      const TARGET_DATE = '2025-12-21T00:00:00';
       const birthdayTarget = useMemo(() => new Date(TARGET_DATE).getTime(), []);
 
       const [currentStage, setCurrentStage] = useState(() => {
@@ -977,7 +977,7 @@
         '19岁生日快乐',
         '欢迎你来到我的全世界'
       ];
-      const typingSpeed = 180;
+      const typingSpeed = 205;
 
       const currentLineIndexRef = useRef(0);
       const currentCharIndexRef = useRef(0);
@@ -1313,7 +1313,7 @@
                 onClick={continueToMain}
               >
                 <div className="scroll-arrow"></div>
-                <div className="scroll-text">上滑继续</div>
+                <div className="scroll-text">上滑继续～</div>
               </div>
             </div>
           )}
