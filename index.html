@@ -656,14 +656,14 @@
     }
 
     .timer-label {
-      font-size: 0.9rem;
+      font-size: 1rem;
       color: #666;
       margin-bottom: 0.5rem;
     }
 
     .timer-digits {
       font-family: 'Courier New', monospace;
-      font-size: 1.2rem;
+      font-size: 1.5rem;
       font-weight: bold;
       color: #444;
       display: flex;
@@ -673,6 +673,8 @@
     .timer-digits span {
       color: #ec4899;
       margin: 0 4px;
+      font-weight: bold;
+      font-family: monospace;
     }
 
     .action-button {
@@ -922,7 +924,7 @@
     /* 覆盖旧样式 */
     .main-title {
       margin-bottom: 1rem;
-      color: #2d3748;
+      color: #9C27B0;
     }
 
 
@@ -943,7 +945,7 @@
     const { useState, useEffect, useRef, useMemo } = React;
 
     const App = () => {
-      const TARGET_DATE = '2025-12-31T00:00:00';
+      const TARGET_DATE = '2025-12-30T14:23:00';
       const birthdayTarget = useMemo(() => new Date(TARGET_DATE).getTime(), []);
 
       const [currentStage, setCurrentStage] = useState(() => {
@@ -1313,7 +1315,7 @@
                 onClick={continueToMain}
               >
                 <div className="scroll-arrow"></div>
-                <div className="scroll-text">上滑继续～</div>
+                <div className="scroll-text">上滑继续</div>
               </div>
             </div>
           )}
