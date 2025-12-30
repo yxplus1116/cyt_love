@@ -170,6 +170,110 @@
 
   <script src="js/index.js"></script>
 
+  <!-- Start Overlay -->
+  <div id="start-overlay" class="start-overlay">
+    <div class="start-content">
+      <h1>🎁</h1>
+      <p>我的女孩</p>
+      <p>19岁生日快乐</p>
+      <p>有一份特别的礼物等你开启</p>
+      <button id="start-btn">点击开启</button>
+    </div>
+  </div>
+
+  <style>
+    .start-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      background: #fff;
+      z-index: 10000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      transition: opacity 1s ease-out;
+    }
+
+    .start-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .start-content {
+      text-align: center;
+      color: #d53f8c;
+      font-family: "Avenir", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    }
+
+    .start-content h1 {
+      font-size: 120px;
+      margin-bottom: 40px;
+    }
+
+    .start-content p {
+      font-size: 34px;
+      margin-bottom: 50px;
+      color: #4a5568;
+    }
+
+    #start-btn {
+      padding: 15px 40px;
+      font-size: 20px;
+      background-color: #d53f8c;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(213, 63, 140, 0.4);
+      transition: transform 0.2s, background-color 0.2s;
+      transform: scale(1.5);
+    }
+
+
+
+    #start-btn:active {
+      transform: scale(0.95);
+    }
+  </style>
+
+  <!-- Background Music -->
+  <audio id="bgm" src="music/birthday.mp3" loop preload="auto"></audio>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      var audio = document.getElementById('bgm');
+      var startOverlay = document.getElementById('start-overlay');
+      var startBtn = document.getElementById('start-btn');
+      var started = false;
+
+      function startExperience() {
+        if (started) return;
+        started = true;
+
+        // Play audio
+        audio.play().catch(function (e) {
+          console.log("Audio play failed", e);
+        });
+
+        // Initialize animation
+        if (window.S && window.S.init) {
+          window.S.init();
+        }
+
+        // Hide overlay
+        startOverlay.classList.add('hidden');
+        setTimeout(function () {
+          startOverlay.style.display = 'none';
+        }, 1000);
+      }
+
+      startBtn.addEventListener('click', startExperience);
+      // Optional: also allow clicking on the overlay text
+      // startOverlay.addEventListener('click', startExperience);
+    });
+  </script>
+
 </body>
 
 </html>

@@ -781,4 +781,4 @@ S.Shape = (function () {
   };
 })();
 
-S.init();
+// S.init();
